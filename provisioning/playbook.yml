@@ -9,7 +9,7 @@
 
   tasks:
     - name: Update apt cache
-      apt: update_cache=yes
+      apt: update_cache=yes cache_valid_time=3600
 
     - name: Install packages
       apt: name={{ item }} state=present
@@ -52,7 +52,11 @@
         - { template: "local_settings.py", dest: "/opt/graphite/webapp/graphite/local_settings.py" }
         - { template: "supervisord.conf", dest: "/etc/supervisor/conf.d/supervisord.conf" }
         - { template: "nginx-graphite.conf", dest: "/etc/nginx/sites-available/default" }
+      notify:
+        - Setup Graphite web DB
+        - Start Graphite and nginx
 
+  handlers:
     - name: Setup Graphite web DB
       shell: django-admin.py migrate --noinput --settings=graphite.settings --run-syncdb
 
