@@ -325,7 +325,7 @@ TIME_ZONE = 'Europe/London'
 #
 # You *should* use 127.0.0.1 here in most cases.
 #
-CARBONLINK_HOSTS = ["127.0.0.1:7012:1", "127.0.0.1:7022:2"]
+CARBONLINK_HOSTS = [{{ range(1, number_of_carbon_caches + 1)|map('regex_replace', '(.*)', '"127.0.0.1:70\g<1>2:\g<1>"')|join(', ') }}]
 #CARBONLINK_TIMEOUT = 1.0
 #CARBONLINK_RETRY_DELAY = 15 # Seconds to blacklist a failed remote server
 #

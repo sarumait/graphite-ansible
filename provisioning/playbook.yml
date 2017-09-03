@@ -5,6 +5,7 @@
     PYTHONPATH: /opt/graphite/lib/:/opt/graphite/webapp/
   vars:
     graphite_version: 1.0.2
+    number_of_carbon_caches: "{{ ansible_processor_vcpus }}"
 
   tasks:
     - name: Update apt cache

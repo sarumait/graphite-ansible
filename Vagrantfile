@@ -72,6 +72,7 @@ Vagrant.configure("2") do |config|
 
   config.vm.provider "virtualbox" do |vb|
     vb.memory = "2048"
+    vb.cpus = 3
   end
 
   config.vm.provision "ansible" do |ansible|

@@ -1,18 +1,14 @@
 [supervisord]
 nodaemon = false
 
-[program:carbon-cache-1]
-command = /opt/graphite/bin/carbon-cache.py --instance=1 --pidfile /var/run/carbon-cache-1.pid start
+{% for cache_index in range(1, number_of_carbon_caches + 1) %}
+[program:carbon-cache-{{ cache_index }}]
+command = /opt/graphite/bin/carbon-cache.py --instance={{ cache_index }} --pidfile /var/run/carbon-cache-{{ cache_index }}.pid start
 stdout_logfile = /var/log/supervisor/%(program_name)s.log
 stderr_logfile = /var/log/supervisor/%(program_name)s.log
 autorestart = true
 
-[program:carbon-cache-2]
-command = /opt/graphite/bin/carbon-cache.py --instance=2 --pidfile /var/run/carbon-cache-2.pid start
-stdout_logfile = /var/log/supervisor/%(program_name)s.log
-stderr_logfile = /var/log/supervisor/%(program_name)s.log
-autorestart = true
-
+{% endfor %}
 [program:carbon-relay]
 command = /opt/graphite/bin/carbon-relay.py --pidfile /var/run/carbon-relay.pid start
 stdout_logfile = /var/log/supervisor/%(program_name)s.log
