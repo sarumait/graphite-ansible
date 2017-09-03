@@ -1,0 +1,28 @@
+[supervisord]
+nodaemon = false
+
+[program:carbon-cache-1]
+command = /opt/graphite/bin/carbon-cache.py --instance=1 --pidfile /var/run/carbon-cache-1.pid start
+stdout_logfile = /var/log/supervisor/%(program_name)s.log
+stderr_logfile = /var/log/supervisor/%(program_name)s.log
+autorestart = true
+
+[program:carbon-cache-2]
+command = /opt/graphite/bin/carbon-cache.py --instance=2 --pidfile /var/run/carbon-cache-2.pid start
+stdout_logfile = /var/log/supervisor/%(program_name)s.log
+stderr_logfile = /var/log/supervisor/%(program_name)s.log
+autorestart = true
+
+[program:carbon-relay]
+command = /opt/graphite/bin/carbon-relay.py --pidfile /var/run/carbon-relay.pid start
+stdout_logfile = /var/log/supervisor/%(program_name)s.log
+stderr_logfile = /var/log/supervisor/%(program_name)s.log
+autorestart = true
+
+[program:graphite-webapp]
+directory = /opt/graphite/webapp
+environment = PYTHONPATH='/opt/graphite/webapp'
+command = /usr/bin/gunicorn -b127.0.0.1:8000 wsgi:application
+stdout_logfile = /var/log/supervisor/%(program_name)s.log
+stderr_logfile = /var/log/supervisor/%(program_name)s.log
+autorestart = true

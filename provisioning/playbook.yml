@@ -1,0 +1,64 @@
+---
+- hosts: all
+  become: true
+  environment:
+    PYTHONPATH: /opt/graphite/lib/:/opt/graphite/webapp/
+  vars:
+    graphite_version: 1.0.2
+
+  tasks:
+    - name: Update apt cache
+      apt: update_cache=yes
+
+    - name: Install packages
+      apt: name={{ item }} state=present
+      with_items:
+        - python-dev 
+        - libcairo2-dev
+        - libffi-dev
+        - libssl-dev 
+        - build-essential
+        - python-pip
+        - uwsgi
+        - uwsgi-plugin-python
+        - python-ldap 
+        - python-cairo 
+        - python-django 
+        - python-twisted 
+        - python-django-tagging 
+        - python-simplejson 
+        - python-pysqlite2 
+        - python-support 
+        - python-tz 
+        - nginx
+        - gunicorn
+        - supervisor
+      
+    - name: Install graphite components
+      pip: name={{ item }} state=present
+      with_items:
+        - https://github.com/graphite-project/whisper/tarball/{{ graphite_version }}
+        - https://github.com/graphite-project/carbon/tarball/{{ graphite_version }}
+        - https://github.com/graphite-project/graphite-web/tarball/{{ graphite_version }}
+        - https://github.com/pyca/pyopenssl/tarball/17.2.0
+
+    - name: Configure services
+      template: src={{ item.template }}.j2 dest={{ item.dest }} mode=0644
+      with_items:
+        - { template: "carbon.conf", dest: "/opt/graphite/conf/carbon.conf" }
+        - { template: "storage-schemas.conf", dest: "/opt/graphite/conf/storage-schemas.conf" }
+        - { template: "wsgi.py", dest: "/opt/graphite/webapp/wsgi.py" }
+        - { template: "local_settings.py", dest: "/opt/graphite/webapp/graphite/local_settings.py" }
+        - { template: "supervisord.conf", dest: "/etc/supervisor/conf.d/supervisord.conf" }
+        - { template: "nginx-graphite.conf", dest: "/etc/nginx/sites-available/default" }
+
+    - name: Setup Graphite web DB
+      shell: django-admin.py migrate --noinput --settings=graphite.settings --run-syncdb
+
+    - name: Start Graphite and nginx
+      service: name={{ item }} state=restarted
+      with_items:
+        - supervisor
+        - nginx
+
+    
